@@ -114,7 +114,7 @@ function TicketDetail() {
 
         try {
             await ticketApi.delete(id);
-            navigate('/');
+            navigate('/tickets');
         } catch (err) {
             console.error('Error deleting ticket:', err);
             alert('Failed to delete ticket. Please try again.');
@@ -132,57 +132,85 @@ function TicketDetail() {
         });
     };
 
-    // Get badge classes
-    const getPriorityClass = (priority: string) => {
+    // Get priority style
+    const getPriorityStyle = (priority: string) => {
         switch (priority) {
-            case 'LOW': return 'badge badge-low';
-            case 'MEDIUM': return 'badge badge-medium';
-            case 'HIGH': return 'badge badge-high';
-            default: return 'badge';
+            case 'LOW': return 'bg-gray-100 text-gray-600';
+            case 'MEDIUM': return 'bg-orange-100 text-orange-700';
+            case 'HIGH': return 'bg-red-100 text-red-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    };
+
+    // Get status style
+    const getStatusStyle = (status: string) => {
+        switch (status) {
+            case 'OPEN': return 'bg-amber-100 text-amber-700';
+            case 'IN_PROGRESS': return 'bg-blue-100 text-blue-700';
+            case 'RESOLVED': return 'bg-green-100 text-green-700';
+            default: return 'bg-gray-100 text-gray-700';
         }
     };
 
     if (loading) {
-        return <div className="loading">Loading ticket...</div>;
+        return (
+            <div className="text-center py-12 text-gray-500">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-200 border-t-black mb-4"></div>
+                <p>Loading ticket...</p>
+            </div>
+        );
     }
 
     if (error || !ticket) {
         return (
             <div>
-                <div className="error-message">{error || 'Ticket not found'}</div>
-                <Link to="/" className="back-link">← Back to Tickets</Link>
+                <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-4">
+                    {error || 'Ticket not found'}
+                </div>
+                <Link to="/tickets" className="text-blue-600 hover:underline">
+                    ← Back to Tickets
+                </Link>
             </div>
         );
     }
 
     return (
         <div>
-            <Link to="/" className="back-link">← Back to Tickets</Link>
+            <Link to="/tickets" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Tickets
+            </Link>
             
-            <div className="card">
-                <div className="ticket-header">
+            {/* Ticket Card */}
+            <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
                     <div>
-                        <h1 className="ticket-title">{ticket.title}</h1>
-                        <div className="ticket-meta">
-                            <span className={getPriorityClass(ticket.priority)}>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">{ticket.title}</h1>
+                        <div className="flex flex-wrap items-center gap-3">
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityStyle(ticket.priority)}`}>
                                 {ticket.priority} Priority
                             </span>
-                            <span style={{ marginLeft: '0.5rem', color: '#6b7280' }}>
-                                Created: {formatDate(ticket.createdAt)}
+                            <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyle(ticket.status)}`}>
+                                {ticket.status.replace('_', ' ')}
+                            </span>
+                            <span className="text-sm text-gray-500">
+                                Created {formatDate(ticket.createdAt)}
                             </span>
                         </div>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <label htmlFor="status-select" style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                            Status:
+                    <div className="flex items-center gap-3">
+                        <label htmlFor="status-select" className="text-sm text-gray-600">
+                            Change Status:
                         </label>
                         <select
                             id="status-select"
-                            className="status-select"
                             value={ticket.status}
                             onChange={(e) => handleStatusChange(e.target.value)}
                             disabled={updating}
+                            className="px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 bg-white"
                         >
                             <option value="OPEN">Open</option>
                             <option value="IN_PROGRESS">In Progress</option>
@@ -191,32 +219,41 @@ function TicketDetail() {
                     </div>
                 </div>
 
-                <div className="ticket-description">
-                    {ticket.description}
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                    <p className="text-gray-700 whitespace-pre-wrap">{ticket.description}</p>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid #e5e7eb' }}>
-                    <span style={{ fontSize: '0.875rem', color: '#6b7280' }}>
+                <div className="flex justify-between items-center pt-4 border-t border-gray-100">
+                    <span className="text-sm text-gray-500">
                         Last updated: {formatDate(ticket.updatedAt)}
                     </span>
-                    <button onClick={handleDelete} className="btn btn-red">
+                    <button 
+                        onClick={handleDelete} 
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                    >
                         Delete Ticket
                     </button>
                 </div>
             </div>
 
             {/* Comments Section */}
-            <div className="comments-section">
-                <h3>Comments ({comments.length})</h3>
+            <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold mb-4">Comments ({comments.length})</h3>
 
                 {/* Add Comment Form */}
-                <div className="comment-form">
-                    <h4>Add a Comment</h4>
+                <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                    <h4 className="font-medium mb-4">Add a Comment</h4>
                     <form onSubmit={handleCommentSubmit}>
-                        {commentError && <div className="error-message">{commentError}</div>}
+                        {commentError && (
+                            <div className="bg-red-50 text-red-700 px-4 py-2 rounded-lg mb-4 text-sm">
+                                {commentError}
+                            </div>
+                        )}
                         
-                        <div className="form-group">
-                            <label htmlFor="author-name">Your Name</label>
+                        <div className="mb-4">
+                            <label htmlFor="author-name" className="block text-sm font-medium text-gray-700 mb-1">
+                                Your Name
+                            </label>
                             <input
                                 type="text"
                                 id="author-name"
@@ -224,24 +261,29 @@ function TicketDetail() {
                                 onChange={(e) => setAuthorName(e.target.value)}
                                 placeholder="Enter your name"
                                 maxLength={50}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5"
                             />
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="comment-message">Message</label>
+                        <div className="mb-4">
+                            <label htmlFor="comment-message" className="block text-sm font-medium text-gray-700 mb-1">
+                                Message
+                            </label>
                             <textarea
                                 id="comment-message"
                                 value={message}
                                 onChange={(e) => setMessage(e.target.value)}
                                 placeholder="Write your comment..."
                                 maxLength={500}
+                                rows={3}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 resize-none"
                             />
-                            <small style={{ color: '#6b7280' }}>{message.length}/500</small>
+                            <small className="text-gray-500">{message.length}/500</small>
                         </div>
 
                         <button 
                             type="submit" 
-                            className="btn btn-blue"
+                            className="px-5 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
                             disabled={submitting}
                         >
                             {submitting ? 'Adding...' : 'Add Comment'}
@@ -251,18 +293,18 @@ function TicketDetail() {
 
                 {/* Comments List */}
                 {comments.length === 0 ? (
-                    <div className="empty-state" style={{ marginTop: '1rem' }}>
+                    <div className="text-center py-8 text-gray-500">
                         No comments yet. Be the first to comment!
                     </div>
                 ) : (
-                    <div style={{ marginTop: '1rem' }}>
+                    <div className="space-y-4">
                         {comments.map((comment) => (
-                            <div key={comment.id} className="comment">
-                                <div className="comment-header">
-                                    <span className="comment-author">{comment.authorName}</span>
-                                    <span className="comment-date">{formatDate(comment.createdAt)}</span>
+                            <div key={comment.id} className="bg-gray-50 rounded-lg p-4">
+                                <div className="flex justify-between items-center mb-2">
+                                    <span className="font-medium text-gray-900">{comment.authorName}</span>
+                                    <span className="text-sm text-gray-500">{formatDate(comment.createdAt)}</span>
                                 </div>
-                                <p>{comment.message}</p>
+                                <p className="text-gray-700">{comment.message}</p>
                             </div>
                         ))}
                     </div>

@@ -67,70 +67,95 @@ function CreateTicket() {
 
     return (
         <div>
-            <Link to="/" className="back-link">← Back to Tickets</Link>
+            <Link to="/tickets" className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+                <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back to Tickets
+            </Link>
             
-            <div className="card" style={{ maxWidth: '600px' }}>
-                <h1 style={{ marginBottom: '1.5rem' }}>Create New Ticket</h1>
+            <div className="max-w-2xl mx-auto">
+                <div className="bg-white rounded-xl border border-gray-200 p-8">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-6">Create New Ticket</h1>
 
-                {errors.general && (
-                    <div className="error-message">{errors.general}</div>
-                )}
+                    {errors.general && (
+                        <div className="bg-red-50 text-red-700 px-4 py-3 rounded-lg mb-6">
+                            {errors.general}
+                        </div>
+                    )}
 
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="ticket-title">Title *</label>
-                        <input
-                            type="text"
-                            id="ticket-title"
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                            placeholder="Brief summary of the issue"
-                            maxLength={80}
-                        />
-                        {errors.title && <div className="form-error">{errors.title}</div>}
-                        <small style={{ color: '#6b7280' }}>{title.length}/80</small>
-                    </div>
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-5">
+                            <label htmlFor="ticket-title" className="block text-sm font-medium text-gray-700 mb-2">
+                                Title <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="ticket-title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="Brief summary of the issue"
+                                maxLength={80}
+                                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 transition ${
+                                    errors.title ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                }`}
+                            />
+                            {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                            <p className="mt-1 text-sm text-gray-500">{title.length}/80</p>
+                        </div>
 
-                    <div className="form-group">
-                        <label htmlFor="ticket-description">Description *</label>
-                        <textarea
-                            id="ticket-description"
-                            value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            placeholder="Provide detailed information about your issue..."
-                            maxLength={2000}
-                            rows={6}
-                        />
-                        {errors.description && <div className="form-error">{errors.description}</div>}
-                        <small style={{ color: '#6b7280' }}>{description.length}/2000</small>
-                    </div>
+                        <div className="mb-5">
+                            <label htmlFor="ticket-description" className="block text-sm font-medium text-gray-700 mb-2">
+                                Description <span className="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                id="ticket-description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
+                                placeholder="Provide detailed information about your issue..."
+                                maxLength={2000}
+                                rows={6}
+                                className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 transition resize-none ${
+                                    errors.description ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                                }`}
+                            />
+                            {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
+                            <p className="mt-1 text-sm text-gray-500">{description.length}/2000</p>
+                        </div>
 
-                    <div className="form-group">
-                        <label htmlFor="ticket-priority">Priority</label>
-                        <select
-                            id="ticket-priority"
-                            value={priority}
-                            onChange={(e) => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH')}
-                        >
-                            <option value="LOW">Low - Minor issue, no rush</option>
-                            <option value="MEDIUM">Medium - Normal priority</option>
-                            <option value="HIGH">High - Urgent, needs immediate attention</option>
-                        </select>
-                    </div>
+                        <div className="mb-6">
+                            <label htmlFor="ticket-priority" className="block text-sm font-medium text-gray-700 mb-2">
+                                Priority
+                            </label>
+                            <select
+                                id="ticket-priority"
+                                value={priority}
+                                onChange={(e) => setPriority(e.target.value as 'LOW' | 'MEDIUM' | 'HIGH')}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black/5 bg-white"
+                            >
+                                <option value="LOW">Low - Minor issue, no rush</option>
+                                <option value="MEDIUM">Medium - Normal priority</option>
+                                <option value="HIGH">High - Urgent, needs immediate attention</option>
+                            </select>
+                        </div>
 
-                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
-                        <button 
-                            type="submit" 
-                            className="btn btn-blue"
-                            disabled={submitting}
-                        >
-                            {submitting ? 'Creating...' : 'Create Ticket'}
-                        </button>
-                        <Link to="/" className="btn btn-gray">
-                            Cancel
-                        </Link>
-                    </div>
-                </form>
+                        <div className="flex items-center gap-4 pt-4 border-t border-gray-100">
+                            <button 
+                                type="submit" 
+                                className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition font-medium disabled:opacity-50"
+                                disabled={submitting}
+                            >
+                                {submitting ? 'Creating...' : 'Create Ticket'}
+                            </button>
+                            <Link 
+                                to="/tickets" 
+                                className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-medium"
+                            >
+                                Cancel
+                            </Link>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
